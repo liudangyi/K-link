@@ -4,9 +4,10 @@
     right: 60px;
     width: 200px;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 3px;
+    z-index: 30000;
     span {
       margin-right: 4px;
       font-weight: bold;
@@ -92,17 +93,17 @@ export default {
       let siblings = node.parentElement.childNodes
       let newHTML = ''
       for (let i = 0, j = 0; i < siblings.length; i++) {
-        if (j === note.nodeIndex) {
-          let original = siblings[i].textContent
-          newHTML += original.slice(0, note.selectionStart)
-          newHTML += '<span class="klink-highlight">' + original.slice(note.selectionStart, note.selectionEnd) + '</span>'
-          newHTML += original.slice(note.selectionEnd)
-        } else {
-          if (siblings[i].nodeType === 3) {
-            newHTML += siblings[i].textContent
+        if (siblings[i].nodeType === 3) {
+          if (j === note.nodeIndex) {
+            let original = siblings[i].textContent
+            newHTML += original.slice(0, note.selectionStart)
+            newHTML += '<span class="klink-highlight">' + original.slice(note.selectionStart, note.selectionEnd) + '</span>'
+            newHTML += original.slice(note.selectionEnd)
           } else {
-            newHTML += siblings[i].outerHTML
+            newHTML += siblings[i].textContent
           }
+        } else {
+          newHTML += siblings[i].outerHTML
         }
         if (siblings[i].nodeType === 3) {
           j++
