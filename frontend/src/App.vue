@@ -63,7 +63,7 @@ export default {
     }
   },
   ready() {
-    let socket = SocketIO('http://127.0.0.1:3000')
+    let socket = SocketIO('http://121.201.29.57:3000')
     let room = document.URL
     this.socket = socket
     socket.on('connect', () => {
