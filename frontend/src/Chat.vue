@@ -43,7 +43,9 @@
       {{chat.content}}
     </div>
   </div>
-  <input type="text" v-el:input v-model="input" @keyup.13="submit">
+  <form @submit.prevent="submit">
+    <input type="text" v-el:input v-model="input">
+  </form>
 </template>
 
 <script>
