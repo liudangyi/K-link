@@ -2,22 +2,42 @@
   .klink-user-avatar {
     position: fixed;
     right: 15px;
-    margin-top: -10px;
-    height: 20px;
-    width: 20px;
+    margin-top: -12px;
+    height: 24px;
+    width: 24px;
     border-radius: 50%;
     transition: top 0.3s ease-out;
+    background-size: cover;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.3);
     &.big {
       margin-top: -15px;
       height: 30px;
       width: 30px;
     }
+    &[data-tooltip]::after {
+      content: attr(data-tooltip);
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -10px;
+      margin-right: 10px;
+      padding: 0px 10px;
+      font-size: 10px;
+      line-height: 20px;
+      border-radius: 3px;
+      background-color: rgba(0, 0, 0, 0.8);;
+      color: white;
+    }
+    &[data-tooltip]:hover::after {
+      display: block;
+    }
   }
 </style>
 
 <template>
-  <img :src="gravatar(user)" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)">
-  <img :src="gravatar(me)" class="klink-user-avatar big" :style="styleOf(me)">
+  <div :data-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)"></div>
+  <div :data-tooltip="me.name" class="klink-user-avatar big" :style="styleOf(me)"></div>
 </template>
 
 <script>
@@ -54,7 +74,7 @@ function getLocation() {
 export default {
   data() {
     let userInfo = JSON.parse(sessionStorage.klinkData)
-    userInfo.email = md5(userInfo.email)
+    userInfo.email = md5(userInfo.email.trim().toLowerCase())
     userInfo.location = getLocation()
     return {
       users: [],
@@ -84,12 +104,9 @@ export default {
   methods: {
     styleOf(user) {
       return {
-        'background-color': '#AAA',
+        'background-image': `url(//www.gravatar.com/avatar/${user.email}?d=identicon)`,
         top: user.location * 100 + '%'
       }
-    },
-    gravatar(user) {
-      return `//www.gravatar.com/avatar/${user.email}`
     },
   }
 }
