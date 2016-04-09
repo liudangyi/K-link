@@ -30,6 +30,7 @@
     <form @submit.prevent="createNote">
       <textarea v-model="newNote.content" rows="2"></textarea>
       <button type="submit">Submit</button>
+      <button @click="mouseLeave(newNote), newNote={}">Cancel</button>
     </form>
   </div>
 </template>
