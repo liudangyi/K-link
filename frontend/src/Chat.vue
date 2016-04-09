@@ -19,6 +19,7 @@
     span {
       margin-right: 4px;
       font-weight: bold;
+      cursor: pointer;
     }
   }
   input {
@@ -39,7 +40,7 @@
 <template>
   <div class="klink-chat" v-el:chat>
     <div v-for="chat in chats">
-      <span :style="{color: '#'+chat.user.email.slice(0, 6)}">{{chat.user.name}}</span>
+      <span :style="{color: '#'+chat.user.email.slice(0, 6)}" @click="jumpTo(chat.user)">{{chat.user.name}}</span>
       {{chat.content}}
     </div>
   </div>
@@ -85,6 +86,9 @@ export default {
     },
     startInput() {
       this.$els.input.focus()
+    },
+    jumpTo(user) {
+      this.$parent.jumpTo(user)
     }
   }
 }

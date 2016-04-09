@@ -9,10 +9,12 @@
     transition: top 0.3s ease-out;
     background-size: cover;
     box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
     &.klink-big {
       margin-top: -15px;
       height: 30px;
       width: 30px;
+      cursor: auto;
     }
     &[data-klink-tooltip]::after {
       content: attr(data-klink-tooltip);
@@ -36,7 +38,7 @@
 </style>
 
 <template>
-  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)"></div>
+  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)" @click="jumpTo(user)"></div>
   <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
   <chat></chat>
 </template>
@@ -72,6 +74,10 @@ function getLocation() {
   return (document.body.scrollTop + window.innerHeight / 2.0) / document.body.scrollHeight
 }
 
+function regularizeURL(url) {
+  return url.split('#')[0]
+}
+
 export default {
   data() {
     let socket = SocketIO('http://121.201.29.57:3000')
@@ -86,11 +92,10 @@ export default {
     }
   },
   ready() {
-    let room = document.URL
     let socket = this.socket
     socket.on('connect', () => {
       this.socketId = socket.id
-      socket.emit('join', room)
+      socket.emit('join', regularizeURL(document.URL))
       socket.emit('scroll', this.me)
     })
     socket.on('users', users => this.users = users)
@@ -110,6 +115,9 @@ export default {
         top: user.location * 100 + '%'
       }
     },
+    jumpTo(user) {
+      window.scroll(0, document.body.scrollHeight * user.location - window.innerHeight / 2)
+    }
   },
   components: {
     chat: require('./Chat.vue'),
