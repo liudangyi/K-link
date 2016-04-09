@@ -55,7 +55,7 @@
     </div>
   </div>
   <form @submit.prevent="submit">
-    <input type="text" id="klink-chat-input" v-el:input v-model="input" :class="{'klink-hide': hidden}">
+    <input type="text" id="klink-chat-input" v-el:input v-model="input" :class="{'klink-hide': hidden}"  @click="hidden = false">
   </form>
 </template>
 
