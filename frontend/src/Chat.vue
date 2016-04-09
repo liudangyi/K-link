@@ -30,7 +30,7 @@
       cursor: pointer;
     }
   }
-  input {
+  #klink-chat-input {
     .klink-style();
     box-sizing: border-box;
     position: fixed;
@@ -55,7 +55,7 @@
     </div>
   </div>
   <form @submit.prevent="submit">
-    <input type="text" v-el:input v-model="input" :class="{'klink-hide': hidden}">
+    <input type="text" id="klink-chat-input" v-el:input v-model="input" :class="{'klink-hide': hidden}">
   </form>
 </template>
 

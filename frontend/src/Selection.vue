@@ -1,37 +1,74 @@
-<style lang="less">
+<style lang="less" scoped>
+  form {
+    padding: 0;
+    margin: 0;
+  }
   .klink-note-block {
     position: absolute;
     right: 60px;
     width: 200px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
     border-radius: 3px;
+    font-size: 14px;
     z-index: 30000;
     span {
       margin-right: 4px;
       font-weight: bold;
     }
-    textarea {
+    #klink-note-textarea {
       background-color: transparent;
+      width: 100%;
+      margin: 0;
+      padding: 5px 10px;
+      border: none;
+      border-bottom: 1px solid #EEE;
+      font-size: 14px;
+      outline: none;
+      resize: none;
     }
   }
+  .klink-btn {
+    outline: none !important;
+    padding: 0;
+    margin: 0 0 8px 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #337ab7;
+    &:hover {
+      text-decoration: underline;
+      color: #23527c;
+    }
+  }
+  .klink-note-item {
+    border-top: 1px solid #EEE;
+    padding: 10px;
+    &:first-child {
+      border-top: none;
+    }
+  }
+</style>
+<style>
   .klink-highlight {
+    display: inline !important;
     background-color: rgba(255, 255, 0, 0.3);
     box-shadow: 0 0 0 3px yellow;
   }
 </style>
 
 <template>
-  <div class="klink-note-block" :style="styleOf(note)" v-for="note in notes" @mouseenter="mouseEnter(note)" @mouseleave="mouseLeave(note)">
-    <span :style="{color: '#'+note.author.email.slice(0, 6)}">{{note.author.name}}</span>
-    {{note.content}}
+  <div class="klink-note-block" :style="styleOf(notes[0])" v-for="notes in groupedNotes">
+    <div class="klink-note-item" v-for="note in notes" @mouseenter="mouseEnter(note)" @mouseleave="mouseLeave(note)">
+      <span :style="{color: '#'+note.author.email.slice(0, 6)}">{{note.author.name}}</span>
+      {{note.content}}
+    </div>
   </div>
   <div class="klink-note-block" :style="styleOf(newNote)" v-if="newNote" @mouseEnter="mouseEnter(newNote)" @mouseLeave="mouseLeave(newNote)">
     <form @submit.prevent="createNote">
-      <textarea v-model="newNote.content" rows="2"></textarea>
-      <button type="submit">Submit</button>
-      <button @click="mouseLeave(newNote), newNote={}">Cancel</button>
+      <textarea v-model="newNote.content" id="klink-note-textarea" rows="5"></textarea>
+      <button class="klink-btn" type="submit">Submit</button>
+      <button class="klink-btn" @click="mouseLeave(newNote), newNote={}">Cancel</button>
     </form>
   </div>
 </template>
@@ -43,6 +80,18 @@ export default {
       // { elementPath, nodeIndex, selectionStart, selectionEnd, content }
       newNote: null,
       notes: [],
+    }
+  },
+  computed: {
+    groupedNotes() {
+      let res = {}
+      this.notes.forEach(note => {
+        if (res[note.elementPath])
+          res[note.elementPath].push(note)
+        else
+          res[note.elementPath] = [note]
+      })
+      return res
     }
   },
   ready() {
