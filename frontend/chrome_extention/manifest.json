@@ -1,0 +1,14 @@
+{
+  "name": "MyExtension",
+  "version": "0.1",
+  "manifest_version": 2,
+  "permissions": [ "notifications", "storage" ],
+  "description": "Link everyone on the page!",
+  "content_scripts" : [{
+      "matches" : ["http://*/*"],
+      "js" : ["inject.js"]
+  }],
+	"browser_action": {
+		"default_popup":"popup.html"
+	}
+}
