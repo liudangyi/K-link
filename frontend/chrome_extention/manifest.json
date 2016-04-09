@@ -1,5 +1,5 @@
 {
-  "name": "MyExtension",
+  "name": "K-link",
   "version": "0.1",
   "manifest_version": 2,
   "permissions": [ "notifications", "storage" ],
@@ -10,5 +10,9 @@
   }],
 	"browser_action": {
 		"default_popup":"popup.html"
-	}
+	},
+  "icons": {
+    "32": "Link.png",
+    "48": "Link.png"
+  }
 }

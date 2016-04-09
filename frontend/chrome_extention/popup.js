@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     e.preventDefault()
   })
   chrome.storage.sync.get(['name', 'email'], function(ret) {
-    document.querySelector('[type=name]').value = ret['name']
-    document.querySelector('[type=email]').value = ret['email']
+    document.querySelector('[name=name]').value = ret['name']
+    document.querySelector('[name=email]').value = ret['email']
   })
 })
