@@ -8,7 +8,7 @@
     right: 60px;
     width: 200px;
     background: white;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
     border-radius: 3px;
     font-size: 14px;
     z-index: 30000;
@@ -20,7 +20,7 @@
       background-color: transparent;
       width: 100%;
       margin: 0;
-      padding: 5px 10px;
+      padding: 10px;
       border: none;
       border-bottom: 1px solid #EEE;
       font-size: 14px;
@@ -40,6 +40,7 @@
       text-decoration: underline;
       color: #23527c;
     }
+    box-shadow: none !important;
   }
   .klink-note-item {
     border-top: 1px solid #EEE;
@@ -59,16 +60,21 @@
 
 <template>
   <div class="klink-note-block" :style="styleOf(notes[0])" v-for="notes in groupedNotes">
-    <div class="klink-note-item" v-for="note in notes" @mouseenter="mouseEnter(note)" @mouseleave="mouseLeave(note)">
+    <div class="klink-note-item" v-for="note in notes" @mouseenter="mouseEnter(note)" @mouseleave="mouseLeave(note)" @click="reply(note)">
       <span :style="{color: '#'+note.author.email.slice(0, 6)}">{{note.author.name}}</span>
       {{note.content}}
     </div>
+    <form @submit.prevent="createNote" v-if="newNote.elementPath && newNoteReply === $key" style="border-top: 1px solid #EEE;">
+      <textarea v-model="newNote.content" id="klink-note-textarea" rows="5"></textarea>
+      <button class="klink-btn" type="submit">Submit</button>
+      <a class="klink-btn" @click="mouseLeave(newNote), newNote={}">Cancel</a>
+    </form>
   </div>
-  <div class="klink-note-block" :style="styleOf(newNote)" v-if="newNote" @mouseEnter="mouseEnter(newNote)" @mouseLeave="mouseLeave(newNote)">
+  <div class="klink-note-block" :style="styleOf(newNote)" v-if="newNote.elementPath && newNoteReply === null" @mouseEnter="mouseEnter(newNote)" @mouseLeave="mouseLeave(newNote)">
     <form @submit.prevent="createNote">
       <textarea v-model="newNote.content" id="klink-note-textarea" rows="5"></textarea>
       <button class="klink-btn" type="submit">Submit</button>
-      <button class="klink-btn" @click="mouseLeave(newNote), newNote={}">Cancel</button>
+      <a class="klink-btn" @click="mouseLeave(newNote), newNote={}">Cancel</a>
     </form>
   </div>
 </template>
@@ -78,8 +84,9 @@ export default {
   data() {
     return {
       // { elementPath, nodeIndex, selectionStart, selectionEnd, content }
-      newNote: null,
+      newNote: {},
       notes: [],
+      newNoteReply: null,
     }
   },
   computed: {
@@ -113,6 +120,7 @@ export default {
         let selectionStart = range.startOffset
         let selectionEnd = range.endOffset
         this.newNote = {elementPath, nodeIndex, selectionStart, selectionEnd}
+        this.newNoteReply = null
       }
     })
   },
@@ -161,8 +169,19 @@ export default {
       node.parentElement.innerHTML = newHTML
     },
     mouseLeave(note) {
+      if (!note.parentNode) return
       note.parentNode.innerHTML = note.backup
       note.node = note.node || getNodeFromPath(note.elementPath)
+    },
+    reply(note) {
+      this.newNote = {
+        content: '',
+        elementPath: note.elementPath,
+        nodeIndex: note.nodeIndex,
+        selectionStart: note.selectionStart,
+        selectionEnd: note.selectionEnd,
+      }
+      this.newNoteReply = note.elementPath
     }
   }
 }
