@@ -50,6 +50,7 @@ MongoClient.connect(url, function(err, db) {
         if (err) {
           console.log(err)
         }
+        io.to(_room).emit('note', data)
       })
     })
 
