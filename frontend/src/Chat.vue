@@ -38,7 +38,6 @@
     left: 0;
     padding: 2px 10px;
     width: 300px;
-    line-height: inherit;
     background-color: rgba(240, 240, 240, 0.9);;
     box-shadow: inset 0px 0px 1px rgba(0, 0, 0, 0.2);
     &:focus {
@@ -70,6 +69,12 @@ export default {
     }
   },
   ready() {
+    document.addEventListener('keyup', (e) => {
+      if (e.keyCode === 27 && this.$els.input === document.activeElement) {
+        this.$els.input.blur()
+        this.hidden = true
+      }
+    })
     document.addEventListener('keypress', (e) => {
       if (e.keyCode === 13 && e.target === document.body) {
         this.startInput()
@@ -91,7 +96,6 @@ export default {
     submit() {
       this.input = this.input.trim()
       if (this.input === '') {
-        this.hidden = true
         this.$els.input.blur()
         return
       }

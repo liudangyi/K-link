@@ -41,6 +41,7 @@
   <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)" @click="jumpTo(user)"></div>
   <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
   <chat></chat>
+  <selection></selection>
 </template>
 
 <script>
@@ -121,6 +122,7 @@ export default {
   },
   components: {
     chat: require('./Chat.vue'),
+    selection: require('./Selection.vue'),
   }
 }
 </script>
