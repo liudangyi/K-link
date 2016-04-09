@@ -9,13 +9,13 @@
     transition: top 0.3s ease-out;
     background-size: cover;
     box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.3);
-    &.big {
+    &.klink-big {
       margin-top: -15px;
       height: 30px;
       width: 30px;
     }
-    &[data-tooltip]::after {
-      content: attr(data-tooltip);
+    &[data-klink-tooltip]::after {
+      content: attr(data-klink-tooltip);
       display: none;
       position: absolute;
       top: 50%;
@@ -29,15 +29,16 @@
       background-color: rgba(0, 0, 0, 0.8);;
       color: white;
     }
-    &[data-tooltip]:hover::after {
+    &[data-klink-tooltip]:hover::after {
       display: block;
     }
   }
 </style>
 
 <template>
-  <div :data-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)"></div>
-  <div :data-tooltip="me.name" class="klink-user-avatar big" :style="styleOf(me)"></div>
+  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)"></div>
+  <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
+  <chat></chat>
 </template>
 
 <script>
@@ -73,19 +74,20 @@ function getLocation() {
 
 export default {
   data() {
+    let socket = SocketIO('http://121.201.29.57:3000')
     let userInfo = JSON.parse(sessionStorage.klinkData)
     userInfo.email = md5(userInfo.email.trim().toLowerCase())
     userInfo.location = getLocation()
     return {
       users: [],
       socketId: '',
-      me: userInfo
+      me: userInfo,
+      socket: socket,
     }
   },
   ready() {
-    let socket = SocketIO('http://121.201.29.57:3000')
     let room = document.URL
-    this.socket = socket
+    let socket = this.socket
     socket.on('connect', () => {
       this.socketId = socket.id
       socket.emit('join', room)
@@ -99,7 +101,7 @@ export default {
   watch: {
     'me.location': throttle(function() {
       this.socket.emit('scroll', this.me)
-    }, 500)
+    }, 300)
   },
   methods: {
     styleOf(user) {
@@ -108,6 +110,9 @@ export default {
         top: user.location * 100 + '%'
       }
     },
+  },
+  components: {
+    chat: require('./Chat.vue'),
   }
 }
 </script>
