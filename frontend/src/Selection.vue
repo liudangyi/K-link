@@ -6,11 +6,12 @@
   .klink-note-block {
     position: absolute;
     right: 60px;
-    width: 200px;
+    width: 270px;
     background: white;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
     border-radius: 3px;
     font-size: 14px;
+    line-height: 20px;
     z-index: 30000;
     span {
       margin-right: 4px;
@@ -126,11 +127,14 @@ export default {
   },
   methods: {
     styleOf(note) {
-      let node = getNodeFromPath(note.elementPath)
-      let range = document.createRange()
-      range.selectNodeContents(node)
+      if (!note.offsetTop) {
+        let node = getNodeFromPath(note.elementPath)
+        let range = document.createRange()
+        range.selectNodeContents(node)
+        note.offsetTop = range.getBoundingClientRect().top + document.body.scrollTop
+      }
       return {
-        top: range.getBoundingClientRect().top + document.body.scrollTop + 'px'
+        top: note.offsetTop + 'px'
       }
     },
     createNote() {
@@ -140,6 +144,7 @@ export default {
       this.mouseLeave(this.newNote)
       this.newNote.node = undefined
       this.newNote.backup = undefined
+      this.newNote.offsetTop = undefined
       this.$parent.socket.emit('note', this.newNote)
       this.newNote = {}
     },
