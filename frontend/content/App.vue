@@ -38,37 +38,34 @@
 </style>
 
 <template>
-  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)" @click="jumpTo(user)"></div>
+  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="id != user.id" v-for="user in users" :style="styleOf(user, user.location)" @click="jumpTo(user)"></div>
   <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
-  <chat></chat>
-  <selection></selection>
+  <!-- <chat></chat>
+  <selection></selection> -->
 </template>
 
 <script>
 import md5 from 'blueimp-md5'
-import SocketIO from 'socket.io-client'
 
 function throttle(fn, threshhold, scope) {
-  threshhold || (threshhold = 250);
-  var last,
-      deferTimer;
-  return function () {
-    var context = scope || this;
-
-    var now = +new Date,
-        args = arguments;
+  threshhold || (threshhold = 250)
+  let last
+  let deferTimer
+  return function() {
+    let context = scope || this
+    let now = +new Date()
+    let args = arguments
     if (last && now < last + threshhold) {
-      // hold on to it
-      clearTimeout(deferTimer);
-      deferTimer = setTimeout(function () {
-        last = now;
-        fn.apply(context, args);
-      }, threshhold);
+      clearTimeout(deferTimer)
+      deferTimer = setTimeout(function() {
+        last = now
+        fn.apply(context, args)
+      }, threshhold)
     } else {
-      last = now;
-      fn.apply(context, args);
+      last = now
+      fn.apply(context, args)
     }
-  };
+  }
 }
 
 function getLocation() {
@@ -81,48 +78,55 @@ function regularizeURL(url) {
 
 export default {
   data() {
-    let socket = SocketIO('http://121.201.29.57:3000')
-    let userInfo = JSON.parse(sessionStorage.klinkData)
-    userInfo.email = md5(userInfo.email.trim().toLowerCase())
-    userInfo.location = getLocation()
+    let port = chrome.runtime.connect({name: "klink"})
+    port.onMessage.addListener((msg) => {
+      if (msg.type === 'user') {
+        this.me = msg.user
+        this.id = msg.id
+      } else if (msg.type === 'users') {
+        console.log(msg.users, this.me)
+        this.users = msg.users
+      }
+    })
+    port.postMessage({ type: 'user' })
+    port.postMessage({ type: 'users' })
     return {
       users: [],
-      socketId: '',
-      me: userInfo,
-      socket: socket,
+      me: {},
+      id: '',
+      location: getLocation(),
+      port: port,
     }
   },
   ready() {
-    let socket = this.socket
-    socket.on('connect', () => {
-      this.socketId = socket.id
-      socket.emit('join', regularizeURL(document.URL))
-      socket.emit('scroll', this.me)
-    })
-    socket.on('users', users => this.users = users)
+    this.location = getLocation()
     document.addEventListener('scroll', () => {
-      this.me.location = getLocation()
+      this.location = getLocation()
     })
   },
   watch: {
-    'me.location': throttle(function() {
-      this.socket.emit('scroll', this.me)
-    }, 300)
+    'location': throttle(function() {
+      this.port.postMessage({
+        type: 'location',
+        location: this.location,
+      })
+    }, 300),
   },
   methods: {
-    styleOf(user) {
+    styleOf(user, location) {
+      location || (location = this.location)
       return {
-        'background-image': `url(//www.gravatar.com/avatar/${user.email}?d=identicon)`,
-        top: user.location * 100 + '%'
+        'background-image': `url(//www.gravatar.com/avatar/${md5(user.email)}?d=identicon)`,
+        top: `${location * 100}%`,
       }
     },
     jumpTo(user) {
       window.scroll(0, document.body.scrollHeight * user.location - window.innerHeight / 2)
-    }
+    },
   },
-  components: {
-    chat: require('./Chat.vue'),
-    selection: require('./Selection.vue'),
-  }
+  // components: {
+  //   chat: require('./Chat.vue'),
+  //   selection: require('./Selection.vue'),
+  // },
 }
 </script>
