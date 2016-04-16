@@ -10,23 +10,25 @@ let activePorts = {}
 let user = {}
 
 chrome.storage.sync.get(['name', 'email'], function(ret) {
+  ret.name || (ret.name = 'anon')
+  ret.email || (ret.email = 'anon@anon.anon')
   user = ret
 })
 
 socket.on('locations', (msg) => {
-  console.log('locations', msg)
   let users = []
-  for (let id in msg.users) {
-    console.log(msg.users)
-    users.push({
-      id: id,
-      name: msg.users[id].user.name,
-      email: msg.users[id].user.email,
-      location: msg.users[id].location,
-    })
+  for (let sid in msg.users) {
+    for (let pid in msg.users[sid]) {
+      users.push({
+        id: sid + pid,
+        name: msg.users[sid][pid].user.name,
+        email: msg.users[sid][pid].user.email,
+        location: msg.users[sid][pid].location,
+      })
+    }
   }
-  for (let id in activePorts) {
-    let port = activePorts[id]
+  for (let pid in activePorts) {
+    let port = activePorts[pid]
     if (port.room === msg.room) {
       port.postMessage({
         type: 'users',
@@ -39,17 +41,17 @@ socket.on('locations', (msg) => {
 chrome.runtime.onConnect.addListener(function(port) {
   console.log(port)
   port.room = port.sender.tab.url
-  port.id = socketId + port.sender.tab.id
+  port.sid = socketId
+  port.pid = port.sender.tab.id
   port.postMessage({test: 'background'})
-  activePorts[port.id] = port
-  console.log(port.room, 'connected')
+  activePorts[port.pid] = port
   port.onDisconnect.addListener(function() {
-    console.log(port.room, 'disconnect')
+    delete activePorts[port.pid]
     socket.emit('leave', {
-      id: port.id,
+      sid: port.sid,
+      pid: port.pid,
       room: port.room,
     })
-    delete activePorts[port.id]
   })
   port.onMessage.addListener(function(msg) {
     port.room = port.sender.tab.url
@@ -57,16 +59,16 @@ chrome.runtime.onConnect.addListener(function(port) {
       port.postMessage({
         type: 'user',
         user: user,
-        id: port.id,
+        id: port.sid + port.pid,
       })
-    } else if (msg.type === 'users') {
       socket.emit('users', port.room)
     } else if (msg.type === 'location') {
       console.log('location', msg.location, user.name)
       socket.emit('location', {
         location: msg.location,
         user: user,
-        id: port.id,
+        sid: port.sid,
+        pid: port.pid,
         room: port.room,
       })
     }

@@ -15,31 +15,29 @@ MongoClient.connect(url, function(err, db) {
   io.on('connection', socket => {
     let socketId = socket.id.slice(2)
     console.log(socketId, 'connected.')
-    socket.on('leave', ({id, room}) => {
-      console.log(id, room)
-      if (!room || !groups[room]) return
-      delete groups[room][id]
+    socket.on('leave', ({sid, pid, room}) => {
+      console.log(sid, pid, 'leave', room)
+      if (!room || !groups[room] || !groups[room][sid]) return
+      delete groups[room][sid][pid]
       io.to(room).emit('locations', {
         room: room,
         users: groups[room],
       })
-      console.log(`${socketId} disconnect to room ${room}, rest ${Object.keys(groups[room]).length}`)
     })
-
     socket.on('location', (data) => {
       console.log('location', data)
       let room = data.room
       groups[room] || (groups[room] = {})
-      if (!groups[room][data.id]) {
+      if (!groups[room][data.sid]) {
         socket.join(room)
+        groups[room][data.sid] = {}
       }
-      groups[room][data.id] = data
+      groups[room][data.sid][data.pid] = data
       io.to(room).emit('locations', {
         room: room,
         users: groups[room],
       })
     })
-
     socket.on('users', (room) => {
       io.to(room).emit('locations', {
         room: room,
@@ -82,12 +80,11 @@ MongoClient.connect(url, function(err, db) {
     })
 
     socket.on('disconnect', () => {
-      // if (!groups[_room]) return
-      // if (groups[_room][socketId]) {
-      //   delete groups[_room][socketId]
-      // }
-      // console.log(`${socketId} leaves room ${_room}, rest ${Object.keys(groups[_room]).length}`)
-      // io.to(_room).emit('users', groups[_room])
+      console.log(socketId, 'disconnected.')
+      for (let room in groups) {
+        console.log(room, groups[room])
+        delete groups[room][socketId]
+      }
     })
   })
 })

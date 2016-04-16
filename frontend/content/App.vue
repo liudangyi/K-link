@@ -38,7 +38,7 @@
 </style>
 
 <template>
-  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="id != user.id" v-for="user in users" :style="styleOf(user, user.location)" @click="jumpTo(user)"></div>
+  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="id != user.id" track-by="id" v-for="user in users" :style="styleOf(user, user.location)" @click="jumpTo(user)"></div>
   <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
   <!-- <chat></chat>
   <selection></selection> -->
@@ -89,7 +89,6 @@ export default {
       }
     })
     port.postMessage({ type: 'user' })
-    port.postMessage({ type: 'users' })
     return {
       users: [],
       me: {},
