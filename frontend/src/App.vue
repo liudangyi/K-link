@@ -45,30 +45,27 @@
 </template>
 
 <script>
-import md5 from 'blueimp-md5'
 import SocketIO from 'socket.io-client'
 
 function throttle(fn, threshhold, scope) {
-  threshhold || (threshhold = 250);
-  var last,
-      deferTimer;
-  return function () {
-    var context = scope || this;
+  threshhold || (threshhold = 250)
+  let last, deferTimer
+  return function() {
+    let context = scope || this
 
-    var now = +new Date,
-        args = arguments;
+    let now = +new Date()
+    let args = arguments
     if (last && now < last + threshhold) {
-      // hold on to it
-      clearTimeout(deferTimer);
-      deferTimer = setTimeout(function () {
-        last = now;
-        fn.apply(context, args);
-      }, threshhold);
+      clearTimeout(deferTimer)
+      deferTimer = setTimeout(function() {
+        last = now
+        fn.apply(context, args)
+      }, threshhold)
     } else {
-      last = now;
-      fn.apply(context, args);
+      last = now
+      fn.apply(context, args)
     }
-  };
+  }
 }
 
 function getLocation() {
@@ -81,9 +78,23 @@ function regularizeURL(url) {
 
 export default {
   data() {
-    let socket = SocketIO('http://121.201.29.57:3000')
-    let userInfo = JSON.parse(sessionStorage.klinkData)
-    userInfo.email = md5(userInfo.email.trim().toLowerCase())
+    let socket = SocketIO('//confluence.seiue.com/klink')
+    console.log(socket)
+    let confluenceDOM = {
+      name: document.getElementsByName('ajs-current-user-fullname'),
+      avatar: document.getElementsByName('ajs-current-user-avatar-url'),
+    }
+    let userInfo = {
+      name: 'anon',
+      avatar: '/images/icons/profilepics/default.png',
+    }
+    if (confluenceDOM.name && confluenceDOM.name[0].content !== '') {
+      userInfo = {
+        name: confluenceDOM.name[0].content,
+        avatar: confluenceDOM.avatar[0].content,
+      }
+    }
+    console.log(userInfo)
     userInfo.location = getLocation()
     return {
       users: [],
@@ -99,7 +110,9 @@ export default {
       socket.emit('join', regularizeURL(document.URL))
       socket.emit('scroll', this.me)
     })
-    socket.on('users', users => this.users = users)
+    socket.on('users', users => {
+      this.users = users
+    })
     document.addEventListener('scroll', () => {
       this.me.location = getLocation()
     })
@@ -107,22 +120,22 @@ export default {
   watch: {
     'me.location': throttle(function() {
       this.socket.emit('scroll', this.me)
-    }, 300)
+    }, 300),
   },
   methods: {
     styleOf(user) {
       return {
-        'background-image': `url(//www.gravatar.com/avatar/${user.email}?d=identicon)`,
-        top: user.location * 100 + '%'
+        'background-image': `url(//confluence.seiue.com${user.avatar})`,
+        top: user.location * 100 + '%',
       }
     },
     jumpTo(user) {
       window.scroll(0, document.body.scrollHeight * user.location - window.innerHeight / 2)
-    }
+    },
   },
   components: {
     chat: require('./Chat.vue'),
     selection: require('./Selection.vue'),
-  }
+  },
 }
 </script>

@@ -1,0 +1,16 @@
+{
+  "parser": "babel-eslint",
+  "extends": "standard",
+  "plugins": [
+    "standard",
+    "eslint-plugin-html",
+  ],
+  "rules": {
+    "space-before-function-paren": [1, "never"],
+    "comma-dangle": [1, "always-multiline"],
+    "no-debugger": 0,
+    "no-unused-vars": 1,
+    "key-spacing": 0,
+    "arrow-parens": 0,
+  },
+}

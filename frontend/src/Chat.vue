@@ -1,5 +1,6 @@
 <style lang="less" scoped>
   .klink-style() {
+    z-index: 65535;
     margin: 0;
     padding: 0;
     border: none;
