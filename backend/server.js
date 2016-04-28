@@ -1,7 +1,9 @@
 let groups = {}
 
+const namespace = '/klink'
 let server = require('http').createServer()
 let io = require('socket.io')(server)
+let nsp = io.of(namespace)
 const port = process.env.PORT || 3000
 
 let MongoClient = require('mongodb').MongoClient
@@ -12,9 +14,9 @@ MongoClient.connect(url, function(err, db) {
     console.log(err)
   }
   console.log('Connected correctly to server.')
-  io.on('connection', socket => {
+  nsp.on('connection', socket => {
     let _room = null
-    let socketId = socket.id.slice(2)
+    let socketId = socket.id.slice(namespace.length + 1)
 
     socket.on('join', (url) => {
       if (!url) return
@@ -28,13 +30,13 @@ MongoClient.connect(url, function(err, db) {
       param.id = socketId
       console.log('scroll', param)
       groups[_room][socketId] = param
-      io.to(_room).emit('users', groups[_room])
+      nsp.to(_room).emit('users', groups[_room])
     })
 
     socket.on('message', param => {
       param.id = socketId
       console.log('message', param)
-      io.to(_room).emit('message', param)
+      nsp.to(_room).emit('message', param)
     })
 
     /*
@@ -50,7 +52,7 @@ MongoClient.connect(url, function(err, db) {
         if (err) {
           console.log(err)
         }
-        io.to(_room).emit('note', data)
+        nsp.to(_room).emit('note', data)
       })
     })
 
@@ -72,7 +74,7 @@ MongoClient.connect(url, function(err, db) {
         delete groups[_room][socketId]
       }
       console.log(`${socketId} leaves room ${_room}, rest ${Object.keys(groups[_room]).length}`)
-      io.to(_room).emit('users', groups[_room])
+      nsp.to(_room).emit('users', groups[_room])
     })
   })
 })

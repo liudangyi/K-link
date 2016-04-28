@@ -78,7 +78,7 @@ function regularizeURL(url) {
 
 export default {
   data() {
-    let socket = SocketIO('//confluence.seiue.com/klink')
+    let socket = SocketIO('https://confluence.seiue.com/klink')
     console.log(socket)
     let confluenceDOM = {
       name: document.getElementsByName('ajs-current-user-fullname'),
