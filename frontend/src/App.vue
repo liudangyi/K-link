@@ -25,6 +25,7 @@
       margin-top: -10px;
       margin-right: 10px;
       padding: 0px 10px;
+      white-space: nowrap;
       font-size: 10px;
       line-height: 20px;
       border-radius: 3px;
