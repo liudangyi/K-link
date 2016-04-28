@@ -38,10 +38,9 @@
 </style>
 
 <template>
-  <div :data-klink-tooltip="user.name" class="klink-user-avatar" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)" @click="jumpTo(user)"></div>
+  <div :data-klink-tooltip="user.name" class="klink-user-avatar" track-by="id" v-if="socketId != user.id" v-for="user in users" :style="styleOf(user)" @click="jumpTo(user)"></div>
   <div :data-klink-tooltip="me.name" class="klink-user-avatar klink-big" :style="styleOf(me)"></div>
   <chat></chat>
-  <selection></selection>
 </template>
 
 <script>
@@ -79,7 +78,6 @@ function regularizeURL(url) {
 export default {
   data() {
     let socket = SocketIO('https://confluence.seiue.com/klink')
-    console.log(socket)
     let confluenceDOM = {
       name: document.getElementsByName('ajs-current-user-fullname'),
       avatar: document.getElementsByName('ajs-current-user-avatar-url'),
@@ -111,7 +109,11 @@ export default {
       socket.emit('scroll', this.me)
     })
     socket.on('users', users => {
-      this.users = users
+      let userArray = []
+      for (let userid in users) {
+        userArray.push(users[userid])
+      }
+      this.users = userArray
     })
     document.addEventListener('scroll', () => {
       this.me.location = getLocation()
@@ -125,7 +127,7 @@ export default {
   methods: {
     styleOf(user) {
       return {
-        'background-image': `url(//confluence.seiue.com${user.avatar})`,
+        'background-image': `url(${user.avatar})`,
         top: user.location * 100 + '%',
       }
     },
@@ -135,7 +137,6 @@ export default {
   },
   components: {
     chat: require('./Chat.vue'),
-    selection: require('./Selection.vue'),
   },
 }
 </script>
