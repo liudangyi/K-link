@@ -117,7 +117,7 @@ export default {
       this.users = userArray
     })
     document.addEventListener('scroll', () => {
-      this.me.location = throttle(getLocation(), 100)
+      this.me.location = getLocation()
     })
   },
   watch: {
