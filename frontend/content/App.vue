@@ -10,6 +10,7 @@
     background-size: cover;
     box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.3);
     cursor: pointer;
+    z-index: 65535;
     &.klink-big {
       margin-top: -15px;
       height: 30px;
@@ -84,7 +85,7 @@ export default {
         this.me = msg.user
         this.id = msg.id
       } else if (msg.type === 'users') {
-        console.log(msg.users, this.me)
+        // console.log(msg.users, this.me)
         this.users = msg.users
       }
     })
