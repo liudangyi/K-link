@@ -5,14 +5,11 @@
 ## Build Setup
 
 ``` bash
-# install dependencies
-npm install
+# build background.js
+cd background && npm install && npm run build
 
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
+# build content_script.js
+cd content && npm install && npm run build
 ```
 
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
+Load chrome_extention manually in your Chrome.
